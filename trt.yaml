@@ -1,0 +1,35 @@
+name: safety-trt-models
+secretPath: /secrets
+secretName: aws-secrets-wdpr-apps-pilot
+imgPullSecretName: wdpr-apps-pilot-use1-ecr
+namespace: fop-dev-1b
+servicePort: 8001
+servicePortName: grpc
+serviceProtocol: TCP
+serviceTargetPort: 8001
+info:
+  - cpuLimit: 16000m
+    cpuRequest: 15600m
+    memoryLimit: 12000M
+    memoryRequest: 11000M
+    gpu: 1
+    global:
+      registry: 392528710678.dkr.ecr.us-east-1.amazonaws.com
+    image:
+      name: safety-trt-models
+      tag: "0.1.b09b666"
+    name: trt-server
+    replicas: 1
+    node_selector_key: 'node-type'
+    node_selector_op: 'In'
+    node_selector_value: 'lambda-node'
+    is_init: true
+    init_cont_name: setup-models
+    init_image: 392528710678.dkr.ecr.us-east-1.amazonaws.com/safety-trt-init:0.1
+    init_env:
+      AWS_ID:  "/secrets/aws-access-key-id"
+      AWS_SECRET: "/secrets/aws-secret-access-key"
+      BUCKET_NAME: "safety-dse-bucket"
+      S3_FOLDER: "fop-dev-models/triton/"
+    env:
+      LD_PRELOAD: "/trt-models/libmyplugins.so"
